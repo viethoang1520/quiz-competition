@@ -17,57 +17,417 @@ const playerSockets = new Map(); // socketId -> { playerId, roomCode }
 
 // Sample questions - EXACTLY 20 questions for Qualification Round (fixed linear order 1→20)
 const QUALIFICATION_QUESTIONS = [
-  { id: '1', text: 'Thủ đô của Việt Nam là gì?', type: 'multiple-choice', options: ['Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Cần Thơ'], correctAnswer: 1, timeLimit: 30 },
-  { id: '2', text: '2 + 2 = ?', type: 'multiple-choice', options: ['3', '4', '5', '6'], correctAnswer: 1, timeLimit: 15 },
-  { id: '3', text: 'Ai là tác giả của "Truyện Kiều"?', type: 'multiple-choice', options: ['Nguyễn Du', 'Hồ Chí Minh', 'Nguyễn Trãi', 'Lý Thái Tổ'], correctAnswer: 0, timeLimit: 30 },
-  { id: '4', text: 'Năm Việt Nam độc lập là năm nào?', type: 'multiple-choice', options: ['1944', '1945', '1946', '1947'], correctAnswer: 1, timeLimit: 30 },
-  { id: '5', text: 'Con sông dài nhất Việt Nam?', type: 'multiple-choice', options: ['Sông Hồng', 'Sông Mekong', 'Sông Đồng Nai', 'Sông Cửu Long'], correctAnswer: 1, timeLimit: 30 },
-  { id: '6', text: 'Đỉnh núi cao nhất Việt Nam là gì?', type: 'multiple-choice', options: ['Pù Luông', 'Fansipan', 'Bà Đen', 'Yên Tử'], correctAnswer: 1, timeLimit: 30 },
-  { id: '7', text: 'Việt Nam có bao nhiêu tỉnh thành?', type: 'multiple-choice', options: ['61', '63', '65', '67'], correctAnswer: 1, timeLimit: 30 },
-  { id: '8', text: '15 x 4 = ?', type: 'multiple-choice', options: ['50', '55', '60', '65'], correctAnswer: 2, timeLimit: 15 },
-  { id: '9', text: 'Ai sáng tác bài thơ "Nam Quốc Sơn Hà"?', type: 'multiple-choice', options: ['Lý Thường Kiệt', 'Trần Hưng Đạo', 'Nguyễn Trãi', 'Lê Lợi'], correctAnswer: 0, timeLimit: 30 },
-  { id: '10', text: 'Biển Đông thuộc đại dương nào?', type: 'multiple-choice', options: ['Đại Tây Dương', 'Ấn Độ Dương', 'Thái Bình Dương', 'Bắc Băng Dương'], correctAnswer: 2, timeLimit: 30 },
-  { id: '11', text: 'Quốc hoa của Việt Nam là loài hoa nào?', type: 'multiple-choice', options: ['Hoa hồng', 'Hoa sen', 'Hoa đào', 'Hoa mai'], correctAnswer: 1, timeLimit: 30 },
-  { id: '12', text: 'Thành phố nào được gọi là "Thành phố đáng sống"?', type: 'multiple-choice', options: ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Huế'], correctAnswer: 2, timeLimit: 30 },
-  { id: '13', text: '100 ÷ 5 = ?', type: 'multiple-choice', options: ['15', '20', '25', '30'], correctAnswer: 1, timeLimit: 15 },
-  { id: '14', text: 'Vịnh Hạ Long nằm ở tỉnh nào?', type: 'multiple-choice', options: ['Hải Phòng', 'Quảng Ninh', 'Thanh Hóa', 'Nghệ An'], correctAnswer: 1, timeLimit: 30 },
-  { id: '15', text: 'Chủ tịch Hồ Chí Minh sinh năm nào?', type: 'multiple-choice', options: ['1888', '1890', '1892', '1894'], correctAnswer: 1, timeLimit: 30 },
-  { id: '16', text: 'Đồng bằng sông nào rộng nhất Việt Nam?', type: 'multiple-choice', options: ['Sông Hồng', 'Sông Cửu Long', 'Sông Đà', 'Sông Mã'], correctAnswer: 1, timeLimit: 30 },
-  { id: '17', text: '7² = ?', type: 'multiple-choice', options: ['14', '42', '49', '56'], correctAnswer: 2, timeLimit: 15 },
-  { id: '18', text: 'Ai là người đầu tiên dịch "Truyện Kiều" sang tiếng Pháp?', type: 'multiple-choice', options: ['Nguyễn Văn Vĩnh', 'Phạm Quỳnh', 'Hoàng Xuân Hãn', 'Abel des Michels'], correctAnswer: 0, timeLimit: 30 },
-  { id: '19', text: 'Hang Sơn Đoòng thuộc tỉnh nào?', type: 'multiple-choice', options: ['Quảng Bình', 'Quảng Trị', 'Thừa Thiên Huế', 'Quảng Nam'], correctAnswer: 0, timeLimit: 30 },
-  { id: '20', text: 'Việt Nam nằm ở khu vực nào của châu Á?', type: 'multiple-choice', options: ['Đông Á', 'Đông Nam Á', 'Nam Á', 'Tây Á'], correctAnswer: 1, timeLimit: 30 },
+  {
+    id: "1",
+    text: "Một phong trào đòi lập nhà nước riêng của một cộng đồng dân cư (nhấn mạnh “quyền sống” và bản sắc) phù hợp nhất với xu hướng nào?",
+    type: "multiple-choice",
+    options: [
+      "Xu hướng liên hiệp các dân tộc do giao lưu kinh tế – văn hóa",
+      "Xu hướng tách ra để hình thành cộng đồng dân tộc độc lập",
+      "Cả hai xu hướng cùng lúc, không phân biệt được",
+      "Không thuộc hai xu hướng khách quan nào",
+    ],
+    correctAnswer: 1,
+    timeLimit: 40,
+  },
+  {
+    id: "2",
+    text: "Tình huống nào dưới đây là “dấu hiệu nhận diện” mạnh nhất của xu hướng thứ nhất (mà không lẫn sang xu hướng thứ hai)?",
+    type: "multiple-choice",
+    options: [
+      "Các dân tộc ký hiệp định thương mại và trao đổi văn hóa rộng rãi",
+      "Các dân tộc trong nhiều quốc gia thành lập liên minh kinh tế khu vực",
+      "Một dân tộc thuộc địa đấu tranh thoát khỏi áp bức, bóc lột của thực dân – đế quốc",
+      "Phát triển khoa học – công nghệ làm gia tăng giao lưu xuyên biên giới",
+    ],
+    correctAnswer: 2,
+    timeLimit: 45,
+  },
+  {
+    id: "3",
+    text: "Nếu lực lượng sản xuất, khoa học – công nghệ và giao lưu kinh tế – văn hóa cùng tăng mạnh, hệ quả nào sau đây “khớp logic” nhất?",
+    type: "multiple-choice",
+    options: [
+      "Nhu cầu xóa bỏ hàng rào ngăn cách dân tộc tăng → các dân tộc xích lại gần nhau",
+      "Ý thức dân tộc suy giảm → các cộng đồng dân cư muốn tách ra mạnh hơn",
+      "Phong trào chống thực dân tất yếu bùng nổ ở mọi nơi",
+      "Các dân tộc ngừng giao lưu để bảo tồn bản sắc",
+    ],
+    correctAnswer: 0,
+    timeLimit: 45,
+  },
+  {
+    id: "4",
+    text: "Chọn mệnh đề “sai tinh vi” so với lập luận về xu hướng thứ hai:",
+    type: "multiple-choice",
+    options: [
+      "Xu hướng thứ hai gắn với nhu cầu xóa bỏ hàng rào ngăn cách giữa các dân tộc",
+      "Xu hướng thứ hai nổi lên trong bối cảnh chủ nghĩa tư bản phát triển thành chủ nghĩa đế quốc",
+      "Xu hướng thứ hai chủ yếu do sự thức tỉnh và trưởng thành về ý thức dân tộc, quyền sống",
+      "Xu hướng thứ hai chịu tác động của giao lưu kinh tế và văn hóa",
+    ],
+    correctAnswer: 2,
+    timeLimit: 45,
+  },
+  {
+    id: "5",
+    text: "Một cộng đồng dân cư đòi tách ra, nhưng lý do được nêu chủ yếu là “muốn mở rộng thị trường, tăng liên kết sản xuất, mở cửa giao thương”. Theo logic của bài học, cách kết luận đúng nhất là gì?",
+    type: "multiple-choice",
+    options: [
+      "Đó vẫn là xu hướng thứ nhất vì có hành vi tách ra",
+      "Đó vẫn là xu hướng thứ hai vì động lực là xóa rào cản và liên kết",
+      "Không thể quy vào xu hướng nào vì hành vi và động lực mâu thuẫn",
+      "Chắc chắn là xu hướng thứ nhất vì liên quan đến dân tộc",
+    ],
+    correctAnswer: 2,
+    timeLimit: 45,
+  },
+  {
+    id: "6",
+    text: "Dân số dân tộc Kinh khoảng 82.085.826 người chiếm 85,3%. Ước lượng tổng dân số (xấp xỉ) hợp lý nhất là?",
+    type: "multiple-choice",
+    options: ["~86,2 triệu", "~92,5 triệu", "~96,2 triệu", "~102,8 triệu"],
+    correctAnswer: 2,
+    timeLimit: 45,
+  },
+  {
+    id: "7",
+    text: "Trong 53 dân tộc thiểu số, có 6 dân tộc trên 1 triệu người và 11 dân tộc dưới 5.000 người. Kết luận định tính “đúng nhất” về cấu trúc dân số là gì?",
+    type: "multiple-choice",
+    options: [
+      "Quy mô dân số giữa các dân tộc tương đối đồng đều",
+      "Chênh lệch quy mô dân số giữa các dân tộc rất lớn",
+      "Hầu hết dân tộc thiểu số đều trên 1 triệu người",
+      "Không thể suy luận gì về chênh lệch quy mô",
+    ],
+    correctAnswer: 1,
+    timeLimit: 40,
+  },
+  {
+    id: "8",
+    text: "Chọn phương án “khớp nhất” với một hệ quả quản trị/ chính sách từ thực tế có nhiều dân tộc dưới 5.000 người:",
+    type: "multiple-choice",
+    options: [
+      "Không cần chính sách riêng vì quy mô nhỏ tự thích nghi",
+      "Dễ gặp khó khăn trong tổ chức cuộc sống và bảo tồn → cần quan tâm đặc biệt",
+      "Đa số sẽ tự động tăng nhanh dân số trong thời gian ngắn",
+      "Chỉ cần tập trung phát triển đô thị là đủ",
+    ],
+    correctAnswer: 1,
+    timeLimit: 45,
+  },
+  {
+    id: "9",
+    text: "Nếu một địa bàn là vùng trung du/miền núi phía Bắc và Tây Nguyên, nhận định nào sau đây phù hợp nhất với mô tả về phân bố dân tộc?",
+    type: "multiple-choice",
+    options: [
+      "Địa bàn sinh sống chủ yếu của người Kinh (Việt)",
+      "Địa bàn sinh sống chủ yếu của nhiều dân tộc thiểu số",
+      "Địa bàn gần như không có cư trú dân tộc thiểu số",
+      "Chỉ có các dân tộc thiểu số trên 1 triệu người",
+    ],
+    correctAnswer: 1,
+    timeLimit: 40,
+  },
+  {
+    id: "10",
+    text: "Chọn phát biểu “khó nhưng đúng” về khái niệm ‘cư trú xen kẽ’ trong đặc điểm dân tộc Việt Nam:",
+    type: "multiple-choice",
+    options: [
+      "Mỗi dân tộc có lãnh thổ cư trú tách biệt rõ ràng, không chồng lấn",
+      "Các dân tộc sống đan xen; ranh giới cư trú không tuyệt đối theo lãnh thổ riêng",
+      "Chỉ dân tộc Kinh cư trú xen kẽ, còn dân tộc khác cư trú tập trung",
+      "Cư trú xen kẽ đồng nghĩa với đồng hóa hoàn toàn",
+    ],
+    correctAnswer: 1,
+    timeLimit: 45,
+  },
+  {
+    id: "11",
+    text: "Nhóm 6 dân tộc thiểu số trên 1 triệu người có tên: Tày, Thái, Mường, Mông, Khmer, Nùng. Nếu đề bài cố tình thay 1 tên bằng “Dao”, thì lỗi nằm ở đâu?",
+    type: "multiple-choice",
+    options: [
+      "Dao không thuộc 54 dân tộc",
+      "Dao không nằm trong nhóm 6 dân tộc thiểu số trên 1 triệu người của danh sách này",
+      "Dao là dân tộc có dân số thấp nhất 428 người",
+      "Dao là dân tộc đa số chiếm 85,3%",
+    ],
+    correctAnswer: 1,
+    timeLimit: 45,
+  },
+  {
+    id: "12",
+    text: "Trong nhóm 6 dân tộc thiểu số trên 1 triệu người, dân tộc đông nhất xấp xỉ 1,85 triệu. Nếu chọn đáp án đúng, bạn phải tránh nhầm với các lựa chọn “có vẻ quen” khác. Dân tộc đó là?",
+    type: "multiple-choice",
+    options: ["Thái", "Khmer", "Tày", "Nùng"],
+    correctAnswer: 2,
+    timeLimit: 40,
+  },
+  {
+    id: "13",
+    text: "Có 11 dân tộc dưới 5.000 người và dân tộc có dân số thấp nhất là 428 người. Kết luận nào hợp lý nhất về mức độ phân hóa trong nhóm 'rất ít người'?",
+    type: "multiple-choice",
+    options: [
+      "Mọi dân tộc dưới 5.000 người đều xấp xỉ 4.900–5.000",
+      "Trong nhóm dưới 5.000 người vẫn có phân hóa mạnh, có trường hợp cực nhỏ (428)",
+      "Nhóm dưới 5.000 người chắc chắn không cần bảo tồn văn hóa",
+      "Không thể so sánh vì 428 không thuộc nhóm dưới 5.000",
+    ],
+    correctAnswer: 1,
+    timeLimit: 45,
+  },
+  {
+    id: "14",
+    text: "Một câu hỏi bẫy: Nếu ai đó nói 'xu hướng thứ nhất xuất hiện vì giao lưu kinh tế – văn hóa tăng', bạn phản biện đúng nhất là?",
+    type: "multiple-choice",
+    options: [
+      "Đúng, vì giao lưu tăng thì ai cũng muốn độc lập",
+      "Sai, vì động lực cốt lõi của xu hướng thứ nhất là thức tỉnh ý thức dân tộc và quyền sống",
+      "Đúng, vì đế quốc bóc lột thuộc địa nên giao lưu tăng",
+      "Không thể kết luận gì vì hai xu hướng không có nguyên nhân",
+    ],
+    correctAnswer: 1,
+    timeLimit: 45,
+  },
+  {
+    id: "15",
+    text: "Chọn phương án mô tả đúng nhất mối quan hệ giữa “xu hướng thứ hai” và “bối cảnh đế quốc chủ nghĩa” theo lập luận trong bài học:",
+    type: "multiple-choice",
+    options: [
+      "Đế quốc chủ nghĩa làm các dân tộc ngừng giao lưu nên không thể liên hiệp",
+      "Đế quốc chủ nghĩa chỉ tạo ra xu hướng tách ra, không liên quan xu hướng liên hiệp",
+      "Trong giai đoạn tư bản phát triển thành đế quốc, cùng với phát triển lực lượng sản xuất/khoa học/giao lưu → nảy sinh nhu cầu xóa rào cản → thúc đẩy các dân tộc xích lại gần nhau",
+      "Đế quốc chủ nghĩa luôn đồng nghĩa với bình đẳng dân tộc nên các dân tộc tự liên hiệp",
+    ],
+    correctAnswer: 2,
+    timeLimit: 45,
+  },
 ];
 
 // Fixed 15 warm-up questions - strictly sequential
 const WARMUP_QUESTIONS = [
-  { id: 'w01', text: 'Hành tinh lớn nhất trong hệ Mặt Trời là gì?', type: 'multiple-choice', options: ['Sao Thổ', 'Sao Mộc', 'Sao Hỏa', 'Trái Đất'], correctAnswer: 1, timeLimit: 10 },
-  { id: 'w02', text: 'Nước nào có diện tích lớn nhất thế giới?', type: 'multiple-choice', options: ['Trung Quốc', 'Mỹ', 'Canada', 'Nga'], correctAnswer: 3, timeLimit: 10 },
-  { id: 'w03', text: 'Kim tự tháp Giza nằm ở quốc gia nào?', type: 'multiple-choice', options: ['Ả Rập Saudi', 'Ai Cập', 'Iraq', 'Iran'], correctAnswer: 1, timeLimit: 10 },
-  { id: 'w04', text: '5 x 8 = ?', type: 'multiple-choice', options: ['35', '40', '45', '50'], correctAnswer: 1, timeLimit: 10 },
-  { id: 'w05', text: 'Nguyên tố hóa học có ký hiệu Au là gì?', type: 'multiple-choice', options: ['Bạc', 'Đồng', 'Vàng', 'Sắt'], correctAnswer: 2, timeLimit: 10 },
-  { id: 'w06', text: 'Đơn vị tiền tệ của Nhật Bản là gì?', type: 'multiple-choice', options: ['Won', 'Yên', 'Nhân dân tệ', 'Đô la'], correctAnswer: 1, timeLimit: 10 },
-  { id: 'w07', text: 'Sông nào dài nhất thế giới?', type: 'multiple-choice', options: ['Sông Amazon', 'Sông Nile', 'Sông Dương Tử', 'Sông Mississippi'], correctAnswer: 1, timeLimit: 10 },
-  { id: 'w08', text: 'Ai là tác giả của bức tranh "Mona Lisa"?', type: 'multiple-choice', options: ['Michelangelo', 'Raphael', 'Leonardo da Vinci', 'Botticelli'], correctAnswer: 2, timeLimit: 10 },
-  { id: 'w09', text: 'Thủ đô của Úc là thành phố nào?', type: 'multiple-choice', options: ['Sydney', 'Melbourne', 'Canberra', 'Brisbane'], correctAnswer: 2, timeLimit: 10 },
-  { id: 'w10', text: '144 ÷ 12 = ?', type: 'multiple-choice', options: ['10', '11', '12', '13'], correctAnswer: 2, timeLimit: 10 },
-  { id: 'w11', text: 'Loài động vật nào lớn nhất trên Trái Đất?', type: 'multiple-choice', options: ['Voi châu Phi', 'Cá voi xanh', 'Hươu cao cổ', 'Cá mập trắng'], correctAnswer: 1, timeLimit: 10 },
-  { id: 'w12', text: 'Năm nào Neil Armstrong đặt chân lên Mặt Trăng?', type: 'multiple-choice', options: ['1965', '1967', '1969', '1971'], correctAnswer: 2, timeLimit: 10 },
-  { id: 'w13', text: 'Công thức hóa học của nước là gì?', type: 'multiple-choice', options: ['CO2', 'H2O', 'NaCl', 'O2'], correctAnswer: 1, timeLimit: 10 },
-  { id: 'w14', text: 'Ai viết vở kịch "Romeo và Juliet"?', type: 'multiple-choice', options: ['Charles Dickens', 'Mark Twain', 'William Shakespeare', 'Jane Austen'], correctAnswer: 2, timeLimit: 10 },
-  { id: 'w15', text: 'Biển nào lớn nhất thế giới?', type: 'multiple-choice', options: ['Biển Đông', 'Biển Địa Trung Hải', 'Biển Caribe', 'Biển Philippines'], correctAnswer: 3, timeLimit: 10 },
+  {
+    id: "w01",
+    text: "Việt Nam là quốc gia đa dân tộc với tổng cộng bao nhiêu dân tộc?",
+    type: "multiple-choice",
+    options: ["52", "53", "54", "55"],
+    correctAnswer: 2,
+    timeLimit: 10,
+  },
+  {
+    id: "w02",
+    text: "Dân tộc chiếm đa số ở Việt Nam là dân tộc nào?",
+    type: "multiple-choice",
+    options: ["Tày", "Kinh (Việt)", "Thái", "Mường"],
+    correctAnswer: 1,
+    timeLimit: 10,
+  },
+  {
+    id: "w03",
+    text: "Tỷ lệ dân số dân tộc Kinh (Việt) chiếm khoảng bao nhiêu %?",
+    type: "multiple-choice",
+    options: ["Khoảng 65,3%", "Khoảng 75,3%", "Khoảng 85,3%", "Khoảng 95,3%"],
+    correctAnswer: 2,
+    timeLimit: 10,
+  },
+  {
+    id: "w04",
+    text: "Đặc điểm cư trú phổ biến của các dân tộc ở Việt Nam là gì?",
+    type: "multiple-choice",
+    options: [
+      "Mỗi dân tộc cư trú tách biệt hoàn toàn",
+      "Các dân tộc cư trú xen kẽ nhau",
+      "Chỉ cư trú tập trung ở đồng bằng",
+      "Chỉ cư trú tập trung ở hải đảo",
+    ],
+    correctAnswer: 1,
+    timeLimit: 10,
+  },
+  {
+    id: "w05",
+    text: "Đồng bào dân tộc thiểu số thường sinh sống chủ yếu ở khu vực nào?",
+    type: "multiple-choice",
+    options: [
+      "Vùng biên giới, miền núi, hải đảo",
+      "Chỉ ở các đô thị lớn",
+      "Chỉ ở đồng bằng ven biển",
+      "Chỉ ở trung tâm công nghiệp",
+    ],
+    correctAnswer: 0,
+    timeLimit: 10,
+  },
+  {
+    id: "w06",
+    text: "Theo chủ nghĩa Mác – Lênin, xu hướng khách quan thứ nhất của quan hệ dân tộc là gì?",
+    type: "multiple-choice",
+    options: [
+      "Cộng đồng dân cư muốn tách ra hình thành dân tộc độc lập",
+      "Các dân tộc luôn hòa tan vào nhau",
+      "Các dân tộc chỉ liên hiệp về kinh tế",
+      "Các dân tộc không bao giờ thay đổi",
+    ],
+    correctAnswer: 0,
+    timeLimit: 10,
+  },
+  {
+    id: "w07",
+    text: "Theo chủ nghĩa Mác – Lênin, xu hướng khách quan thứ hai của quan hệ dân tộc là gì?",
+    type: "multiple-choice",
+    options: [
+      "Các dân tộc trong một hoặc nhiều quốc gia muốn liên hiệp lại",
+      "Các dân tộc đều muốn cô lập với thế giới",
+      "Các dân tộc chỉ cạnh tranh và đối đầu",
+      "Các dân tộc không có nhu cầu giao lưu",
+    ],
+    correctAnswer: 0,
+    timeLimit: 10,
+  },
+  {
+    id: "w08",
+    text: "Một nội dung trong Cương lĩnh dân tộc của chủ nghĩa Mác – Lênin là gì?",
+    type: "multiple-choice",
+    options: [
+      "Các dân tộc hoàn toàn bình đẳng",
+      "Chỉ ưu tiên một dân tộc lãnh đạo",
+      "Không công nhận sự khác biệt dân tộc",
+      "Hạn chế giao lưu văn hóa",
+    ],
+    correctAnswer: 0,
+    timeLimit: 10,
+  },
+  {
+    id: "w09",
+    text: "Nội dung “Các dân tộc được quyền tự quyết” trong Cương lĩnh dân tộc nhằm nhấn mạnh điều gì?",
+    type: "multiple-choice",
+    options: [
+      "Quyền quyết định vận mệnh, con đường phát triển của cộng đồng dân tộc",
+      "Quyền đóng cửa không giao lưu với ai",
+      "Quyền loại trừ các dân tộc khác",
+      "Quyền chỉ tham gia kinh tế, không tham gia chính trị",
+    ],
+    correctAnswer: 0,
+    timeLimit: 10,
+  },
+  {
+    id: "w10",
+    text: "Thách thức nổi bật trong quan hệ dân tộc hiện nay liên quan đến phát triển là gì?",
+    type: "multiple-choice",
+    options: [
+      "Chênh lệch trình độ phát triển kinh tế – xã hội giữa các vùng, các dân tộc",
+      "Tất cả vùng đều phát triển ngang nhau",
+      "Không còn vấn đề sinh kế",
+      "Không còn khó khăn về hạ tầng",
+    ],
+    correctAnswer: 0,
+    timeLimit: 10,
+  },
+  {
+    id: "w11",
+    text: "Toàn cầu hóa có thể tác động đến văn hóa dân tộc theo hướng nào?",
+    type: "multiple-choice",
+    options: [
+      "Chỉ mang lại lợi ích, không có rủi ro",
+      "Chỉ làm mất văn hóa truyền thống",
+      "Gia tăng nguy cơ mai một bản sắc nếu thiếu chọn lọc",
+      "Hoàn toàn không ảnh hưởng đến văn hóa",
+    ],
+    correctAnswer: 2,
+    timeLimit: 10,
+  },
+  {
+    id: "w12",
+    text: "Một thủ đoạn phổ biến của các thế lực thù địch lợi dụng vấn đề dân tộc là gì?",
+    type: "multiple-choice",
+    options: [
+      "Xuyên tạc, phủ nhận chính sách dân tộc của Đảng và Nhà nước",
+      "Khuyến khích đoàn kết và giao lưu văn hóa",
+      "Tăng đầu tư hạ tầng vùng khó khăn",
+      "Hỗ trợ giáo dục và y tế vùng dân tộc",
+    ],
+    correctAnswer: 0,
+    timeLimit: 10,
+  },
+  {
+    id: "w13",
+    text: "Vì sao những địa bàn vùng dân tộc thiểu số thường được xem là “chiến lược quan trọng”?",
+    type: "multiple-choice",
+    options: [
+      "Vì liên quan đến quốc phòng – an ninh, kinh tế và môi trường sinh thái",
+      "Vì chỉ có giá trị du lịch",
+      "Vì không liên quan đến an ninh",
+      "Vì chỉ tập trung ở đô thị",
+    ],
+    correctAnswer: 0,
+    timeLimit: 10,
+  },
+  {
+    id: "w14",
+    text: "Trong bối cảnh hiện nay, một khó khăn xã hội dễ phát sinh ở vùng dân tộc là gì?",
+    type: "multiple-choice",
+    options: [
+      "Tranh chấp đất đai, tài nguyên, sinh kế, di cư tự do",
+      "Không còn nhu cầu việc làm",
+      "Không còn chênh lệch thông tin",
+      "Không còn tác động từ hội nhập",
+    ],
+    correctAnswer: 0,
+    timeLimit: 10,
+  },
+  {
+    id: "w15",
+    text: "Trách nhiệm phù hợp của sinh viên để góp phần bảo vệ khối đại đoàn kết dân tộc là gì?",
+    type: "multiple-choice",
+    options: [
+      "Chia sẻ tin chưa kiểm chứng để “cảnh báo” mọi người",
+      "Cảnh giác, kiểm chứng thông tin trước khi chia sẻ và tôn trọng sự khác biệt",
+      "Tham gia bình luận công kích, kỳ thị dân tộc khác",
+      "Thờ ơ, không quan tâm các vấn đề xã hội",
+    ],
+    correctAnswer: 1,
+    timeLimit: 10,
+  },
 ];
 
 // Warm-up round duration: 3 minutes = 180 seconds
 const WARMUP_DURATION = 180;
 
 const BUZZER_QUESTIONS = [
-  { id: 'b1', text: 'Ai phát hiện ra châu Mỹ?', type: 'buzzer', correctAnswer: null, timeLimit: 60 },
-  { id: 'b2', text: 'Kim tự tháp Giza nằm ở quốc gia nào?', type: 'buzzer', correctAnswer: null, timeLimit: 60 },
-  { id: 'b3', text: 'Ai viết "Romeo và Juliet"?', type: 'buzzer', correctAnswer: null, timeLimit: 60 },
-  { id: 'b4', text: 'Nguyên tố hóa học có ký hiệu Au là gì?', type: 'buzzer', correctAnswer: null, timeLimit: 60 },
-  { id: 'b5', text: 'Chiến tranh thế giới thứ hai kết thúc năm nào?', type: 'buzzer', correctAnswer: null, timeLimit: 60 },
-];
+  {
+    "id": "1",
+    "text": "Việt Nam hiện nay có tất cả bao nhiêu dân tộc anh em cùng chung sống trên một lãnh thổ thống nhất?",
+    "type": "buzzer",
+    "correctAnswer": null,
+    "timeLimit": 60
+  },
+  {
+    "id": "2",
+    "text": "Dân tộc nào chiếm đa số (khoảng 85,3%) trong tổng dân số của Việt Nam?",
+    "type": "buzzer",
+    "correctAnswer": null,
+    "timeLimit": 60
+  },
+  {
+    "id": "3",
+    "text": "Theo chủ nghĩa Mác - Lênin, có mấy xu hướng khách quan trong sự phát triển của quan hệ dân tộc?",
+    "type": "buzzer",
+    "correctAnswer": null,
+    "timeLimit": 60
+  },
+  {
+    "id": "4",
+    "text": "Đặc điểm cư trú nổi bật nhất của các dân tộc ở Việt Nam là gì (tập trung hay xen kẽ)?",
+    "type": "buzzer",
+    "correctAnswer": null,
+    "timeLimit": 60
+  },
+  {
+    "id": "5",
+    "text": "Một trong những truyền thống quý báu nhất của các dân tộc Việt Nam được hình thành trong quá trình dựng nước và giữ nước là gì?",
+    "type": "buzzer",
+    "correctAnswer": null,
+    "timeLimit": 60
+  }
+]
 
 function generateRoomCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -509,7 +869,17 @@ app.prepare().then(() => {
         case 'buzzer':
           questions = gameState.buzzerQuestions;
           if (gameState.currentQuestionIndex >= questions.length) {
+            // Clear timer when game finishes
+            if (timers.has(roomCode)) {
+              clearInterval(timers.get(roomCode));
+              timers.delete(roomCode);
+            }
+
             gameState.phase = 'finished';
+            gameState.currentQuestion = null; // Clear current question
+            gameState.timeRemaining = 0; // Reset time
+            gameState.buzzerEnabled = false;
+
             gameStates.set(roomCode, gameState);
             io.to(roomCode).emit('game-state', gameState);
             io.to(roomCode).emit('phase-changed', 'finished');

@@ -186,8 +186,8 @@ export default function HostPage() {
       <main className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Question & Timer */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Timer - Only show for warmup and buzzer rounds */}
-          {gameState?.currentQuestion && gameState.phase !== 'qualification' && (
+          {/* Timer - Only show for active buzzer round questions (not finished, not honor board, not qualification) */}
+          {gameState?.currentQuestion && gameState.phase === 'buzzer' && gameState.phase !== 'finished' && (
             <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-slate-400">Thời gian còn lại</span>
@@ -305,8 +305,8 @@ export default function HostPage() {
                   >
                     <div className="flex items-center space-x-4">
                       <span className={`text-3xl font-bold ${idx < 4
-                          ? idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-orange-400' : 'text-green-400'
-                          : 'text-red-400'
+                        ? idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-orange-400' : 'text-green-400'
+                        : 'text-red-400'
                         }`}>
                         {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
                       </span>
@@ -454,8 +454,8 @@ export default function HostPage() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
                             <span className={`text-3xl font-bold ${idx === 0 ? 'text-yellow-400' :
-                                idx === 1 ? 'text-slate-300' :
-                                  idx === 2 ? 'text-orange-400' : 'text-green-400'
+                              idx === 1 ? 'text-slate-300' :
+                                idx === 2 ? 'text-orange-400' : 'text-green-400'
                               }`}>
                               {medal || `#${idx + 1}`}
                             </span>

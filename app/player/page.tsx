@@ -401,8 +401,8 @@ export default function PlayerPage() {
 
       {/* Main Content */}
       <main className="flex-1 p-4 flex flex-col">
-        {/* Timer - Only for warmup and buzzer */}
-        {gameState?.currentQuestion && gameState.phase !== 'qualification' && (
+        {/* Timer - Only for active buzzer round (not finished, not honor board, not qualification) */}
+        {gameState?.currentQuestion && gameState.phase === 'buzzer' && gameState.phase !== 'finished' && (
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-slate-400 text-sm">Thời gian</span>
@@ -644,8 +644,8 @@ export default function PlayerPage() {
                   >
                     <div className="flex items-center space-x-4">
                       <span className={`text-2xl font-bold ${idx < 4
-                          ? idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-orange-400' : 'text-green-400'
-                          : 'text-red-400'
+                        ? idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-orange-400' : 'text-green-400'
+                        : 'text-red-400'
                         }`}>
                         #{idx + 1}
                       </span>
