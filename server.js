@@ -163,8 +163,11 @@ function endWarmupRound(io, roomCode) {
     warmupTimers.delete(roomCode);
   }
 
-  // Calculate top 8 players by warmup score, then by total response time
-  const rankedPlayers = [...gameState.players].sort((a, b) => {
+  // Get only active (non-eliminated) players for ranking
+  const activePlayers = gameState.players.filter(p => !p.eliminated);
+
+  // Calculate ranking by warmup score, then by total response time
+  const rankedPlayers = [...activePlayers].sort((a, b) => {
     const scoreA = a.warmupScore || 0;
     const scoreB = b.warmupScore || 0;
     if (scoreA !== scoreB) return scoreB - scoreA;
@@ -174,8 +177,21 @@ function endWarmupRound(io, roomCode) {
     return timeA - timeB;
   });
 
+  // Add warmup score to total score for all active players
+  activePlayers.forEach(player => {
+    player.score += (player.warmupScore || 0);
+  });
+
+  // Mark players ranked 5-8 as eliminated (only TOP 4 continue to buzzer)
+  rankedPlayers.forEach((player, idx) => {
+    if (idx >= 4) {
+      player.eliminated = true;
+      player.eliminatedAt = 'warmup';
+    }
+  });
+
   gameState.phase = 'warmup-honor';
-  gameState.warmupRanking = rankedPlayers.slice(0, 8);
+  gameState.warmupRanking = rankedPlayers; // Full ranking for display
   gameState.currentQuestion = null;
 
   gameStates.set(roomCode, gameState);
@@ -348,7 +364,7 @@ app.prepare().then(() => {
       if (!gameState || gameState.phase !== 'warmup') return;
 
       const player = gameState.players.find(p => p.id === playerId);
-      if (!player || player.warmupCompleted) return;
+      if (!player || player.warmupCompleted || player.eliminated) return;
 
       const questionIndex = answer.questionIndex;
       const question = gameState.warmupQuestions[questionIndex];
@@ -401,8 +417,9 @@ app.prepare().then(() => {
         completed: player.warmupCompleted
       });
 
-      // Check if ALL players have completed
-      const allCompleted = gameState.players.every(p => p.warmupCompleted);
+      // Check if ALL active (non-eliminated) players have completed
+      const activePlayers = gameState.players.filter(p => !p.eliminated);
+      const allCompleted = activePlayers.every(p => p.warmupCompleted);
       if (allCompleted) {
         // End warmup early
         endWarmupRound(io, roomCode);
@@ -419,18 +436,38 @@ app.prepare().then(() => {
 
       // For qualification phase, "next-question" means end the qualification round and start warmup
       if (gameState.phase === 'qualification') {
+        // Sort players by qualification score
+        const sortedPlayers = [...gameState.players].sort((a, b) => {
+          if (a.score !== b.score) return b.score - a.score;
+          return (a.lastAnswerTime || 0) - (b.lastAnswerTime || 0);
+        });
+
+        // Mark players outside TOP 8 as eliminated
+        sortedPlayers.forEach((player, idx) => {
+          if (idx >= 8) {
+            player.eliminated = true;
+            player.eliminatedAt = 'qualification';
+          }
+        });
+
+        // Reset score for warmup phase (qualification score was just for ranking)
+        gameState.players.forEach(player => {
+          player.score = 0;
+        });
+
         // Move to warmup phase
         gameState.phase = 'warmup';
         gameState.currentQuestionIndex = 0;
-        gameState.players = selectTopPlayers(gameState.players, 8);
 
-        // Initialize warmup tracking for each player
+        // Initialize warmup tracking for non-eliminated players only
         gameState.players.forEach(player => {
-          player.warmupQuestionIndex = 0;
-          player.warmupScore = 0;
-          player.warmupTotalTime = 0;
-          player.warmupCompleted = false;
-          player.warmupAnswers = [];
+          if (!player.eliminated) {
+            player.warmupQuestionIndex = 0;
+            player.warmupScore = 0;
+            player.warmupTotalTime = 0;
+            player.warmupCompleted = false;
+            player.warmupAnswers = [];
+          }
         });
 
         gameState.warmupTimeRemaining = WARMUP_DURATION;
@@ -450,8 +487,7 @@ app.prepare().then(() => {
       if (gameState.phase === 'warmup-honor') {
         gameState.phase = 'buzzer';
         gameState.currentQuestionIndex = 0;
-        // Keep only top 8 players for buzzer round
-        gameState.players = gameState.warmupRanking || selectTopPlayers(gameState.players, 8);
+        // Players array already has eliminated players marked - don't replace it
         gameState.currentQuestion = gameState.buzzerQuestions[0];
         gameState.timeRemaining = gameState.currentQuestion.timeLimit;
         gameState.buzzerEnabled = false;
@@ -551,7 +587,7 @@ app.prepare().then(() => {
       if (!gameState || !gameState.buzzerEnabled) return;
 
       const player = gameState.players.find(p => p.id === playerId);
-      if (!player) return;
+      if (!player || player.eliminated) return;
 
       const buzzerEntry = {
         playerId,

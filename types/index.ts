@@ -20,6 +20,9 @@ export interface Player {
   lastAnswerTime?: number;
   buzzerRank?: number;
   connected: boolean;
+  // Elimination tracking
+  eliminated?: boolean;
+  eliminatedAt?: 'qualification' | 'warmup';
   // Qualification round tracking
   qualificationCompleted?: boolean;
   qualificationQuestionIndex?: number;

@@ -54,11 +54,8 @@ export default function PlayerPage() {
   const [isWarmupActive, setIsWarmupActive] = useState(false);
   const [warmupHonorBoard, setWarmupHonorBoard] = useState<Player[]>([]);
 
-  // Get current player data
-  const currentPlayer = gameState?.players.find(p => {
-    // Match by socket id stored in session
-    return p.id === socket?.data?.playerId;
-  });
+  // Get current player data by name
+  const currentPlayer = gameState?.players.find(p => p.name === playerName);
 
   useEffect(() => {
     const cleanup = onTimerUpdate?.((time) => {
@@ -88,7 +85,7 @@ export default function PlayerPage() {
   useEffect(() => {
     const cleanup = onQualificationResult?.((correct, points, totalScore, isComplete, questions) => {
       console.log('[Qualification] Result received:', { correct, points, totalScore, isComplete });
-      
+
       // Fallback: if questions not set yet, set them now
       if (questions && qualificationQuestions.length === 0) {
         console.log('[Qualification] Setting questions from result callback');
@@ -97,7 +94,7 @@ export default function PlayerPage() {
 
       setQualificationScore(totalScore);
       setLastResult({ correct, points });
-      
+
       setTimeout(() => {
         setLastResult(null);
         if (isComplete) {
@@ -433,6 +430,29 @@ export default function PlayerPage() {
           </div>
         )}
 
+        {/* ELIMINATED STATE - Show when player is eliminated */}
+        {currentPlayer?.eliminated && gameState?.phase !== 'waiting' && gameState?.phase !== 'finished' && (
+          <div className="flex-1 flex items-center justify-center p-4">
+            <div className="text-center space-y-6 bg-gradient-to-br from-red-900/30 to-slate-900/50 rounded-2xl p-8 border-2 border-red-500/50 max-w-md">
+              <div className="text-6xl">😢</div>
+              <h2 className="text-2xl font-bold text-red-400">Bạn đã bị loại</h2>
+              <p className="text-slate-300">
+                {currentPlayer.eliminatedAt === 'qualification'
+                  ? 'Bạn không lọt vào TOP 8 thí sinh có điểm cao nhất ở Vòng Khởi Động.'
+                  : 'Bạn không lọt vào TOP 4 thí sinh có điểm cao nhất ở Vòng Vượt Chướng Ngại Vật.'
+                }
+              </p>
+              <div className="bg-slate-800/50 rounded-xl p-4">
+                <p className="text-slate-400 text-sm">Điểm của bạn:</p>
+                <p className="text-3xl font-bold text-[#7C3AED]">{currentPlayer.score || 0}</p>
+              </div>
+              <p className="text-slate-500 text-sm">
+                Cảm ơn bạn đã tham gia. Chúc may mắn lần sau! 🍀
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* QUALIFICATION ROUND - Individual Exam */}
         {gameState?.phase === 'qualification' && !qualificationCompleted && qualificationQuestions.length > 0 && (
           <div className="flex-1 flex flex-col">
@@ -504,7 +524,7 @@ export default function PlayerPage() {
         )}
 
         {/* Warmup Round - Sequential Questions with 3-min Timer */}
-        {gameState?.phase === 'warmup' && isWarmupActive && !warmupCompleted && warmupQuestions.length > 0 && (
+        {gameState?.phase === 'warmup' && !currentPlayer?.eliminated && isWarmupActive && !warmupCompleted && warmupQuestions.length > 0 && (
           <div className="flex-1 flex flex-col">
             {/* Warmup Timer */}
             <div className="mb-4 bg-slate-800/50 rounded-xl p-4 border border-slate-700">
@@ -571,7 +591,7 @@ export default function PlayerPage() {
         )}
 
         {/* Warmup Completed - Waiting for others */}
-        {gameState?.phase === 'warmup' && warmupCompleted && (
+        {gameState?.phase === 'warmup' && !currentPlayer?.eliminated && warmupCompleted && (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center space-y-6 bg-slate-800/50 rounded-2xl p-8 border border-slate-700">
               <div className="text-6xl">✅</div>
@@ -600,18 +620,21 @@ export default function PlayerPage() {
             <div className="w-full max-w-lg space-y-6">
               <div className="text-center">
                 <h2 className="text-3xl font-bold text-[#FFD700] animate-pulse">🏆 BẢNG VINH DANH 🏆</h2>
-                <p className="text-slate-400 mt-2">Top 8 thí sinh xuất sắc nhất</p>
+                <p className="text-slate-400 mt-2">Kết quả Vòng Vượt Chướng Ngại Vật</p>
+                <p className="text-[#22C55E] text-sm mt-1">TOP 4 sẽ vào Vòng Tăng Tốc</p>
               </div>
 
               <div className="space-y-3">
-                {warmupHonorBoard.slice(0, 8).map((player, idx) => (
+                {warmupHonorBoard.map((player, idx) => (
                   <div
                     key={player.id}
                     className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-500 transform
-                      ${idx === 0 ? 'bg-yellow-500/20 border-yellow-500 scale-105' :
-                        idx === 1 ? 'bg-slate-400/20 border-slate-400' :
-                          idx === 2 ? 'bg-orange-600/20 border-orange-500' :
-                            'bg-slate-800/50 border-slate-600'}
+                      ${idx < 4
+                        ? idx === 0 ? 'bg-yellow-500/20 border-yellow-500 scale-105' :
+                          idx === 1 ? 'bg-slate-400/20 border-slate-400' :
+                            idx === 2 ? 'bg-orange-600/20 border-orange-500' :
+                              'bg-green-600/20 border-green-500'
+                        : 'bg-red-900/20 border-red-500/50 opacity-60'}
                       ${player.name === playerName ? 'ring-2 ring-[#7C3AED]' : ''}
                     `}
                     style={{
@@ -620,15 +643,24 @@ export default function PlayerPage() {
                     }}
                   >
                     <div className="flex items-center space-x-4">
-                      <span className={`text-2xl font-bold ${idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-orange-400' : 'text-slate-400'}`}>
+                      <span className={`text-2xl font-bold ${idx < 4
+                          ? idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-orange-400' : 'text-green-400'
+                          : 'text-red-400'
+                        }`}>
                         #{idx + 1}
                       </span>
-                      <span className="font-semibold text-lg">
-                        {player.name}
-                        {player.name === playerName && <span className="text-[#7C3AED] ml-2">(Bạn)</span>}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-lg">
+                          {player.name}
+                          {player.name === playerName && <span className="text-[#7C3AED] ml-2">(Bạn)</span>}
+                        </span>
+                        {idx < 4
+                          ? <span className="text-xs text-green-400">Vào Vòng Tăng Tốc</span>
+                          : <span className="text-xs text-red-400">Bị loại</span>
+                        }
+                      </div>
                     </div>
-                    <span className="text-xl font-bold text-[#22C55E]">{player.warmupScore || 0} điểm</span>
+                    <span className="text-xl font-bold text-[#22C55E]">{player.score || 0} điểm</span>
                   </div>
                 ))}
               </div>
@@ -641,7 +673,7 @@ export default function PlayerPage() {
         )}
 
         {/* Buzzer Round */}
-        {gameState?.phase === 'buzzer' && (
+        {gameState?.phase === 'buzzer' && !currentPlayer?.eliminated && (
           <div className="flex-1 flex flex-col">
             {/* Question */}
             {gameState.currentQuestion && (
@@ -775,8 +807,8 @@ export default function PlayerPage() {
                         >
                           <div className="flex items-center gap-3">
                             <span className={`font-bold w-8 text-center ${idx === 0 ? 'text-yellow-400' :
-                                idx === 1 ? 'text-slate-300' :
-                                  idx === 2 ? 'text-orange-400' : 'text-slate-500'
+                              idx === 1 ? 'text-slate-300' :
+                                idx === 2 ? 'text-orange-400' : 'text-slate-500'
                               }`}>
                               {medal || `#${idx + 1}`}
                             </span>
@@ -785,10 +817,10 @@ export default function PlayerPage() {
                             </span>
                           </div>
                           <span className={`font-bold ${idx === 0 ? 'text-yellow-400' :
-                              idx === 1 ? 'text-slate-300' :
-                                idx === 2 ? 'text-orange-400' : 'text-slate-400'
+                            idx === 1 ? 'text-slate-300' :
+                              idx === 2 ? 'text-orange-400' : 'text-slate-400'
                             }`}>
-                            {player.score} đ
+                            {player.score}
                           </span>
                         </div>
                       );

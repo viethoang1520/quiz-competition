@@ -252,7 +252,7 @@ export default function HostPage() {
               <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
                 <h2 className="text-lg font-semibold text-slate-300 mb-4">Tiến độ thí sinh</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {gameState.players.map((player) => {
+                  {gameState.players.filter(p => !p.eliminated).map((player) => {
                     const progress = warmupPlayerProgress.get(player.id) || { questionIndex: 0, score: 0, completed: false };
                     return (
                       <div key={player.id} className={`bg-slate-700/50 rounded-xl p-4 text-center border-2 ${progress.completed ? 'border-[#22C55E]' : 'border-transparent'}`}>
@@ -283,30 +283,42 @@ export default function HostPage() {
             <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-8 border-2 border-[#FFD700]">
               <div className="text-center mb-6">
                 <h2 className="text-4xl font-bold text-[#FFD700] animate-pulse">🏆 BẢNG VINH DANH 🏆</h2>
-                <p className="text-slate-400 mt-2">Top 8 thí sinh xuất sắc nhất Vòng Vượt Chướng Ngại Vật</p>
+                <p className="text-slate-400 mt-2">Kết quả Vòng Vượt Chướng Ngại Vật</p>
+                <p className="text-[#22C55E] text-sm mt-1">TOP 4 sẽ vào Vòng Tăng Tốc</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {warmupHonorBoard.slice(0, 8).map((player, idx) => (
+                {warmupHonorBoard.map((player, idx) => (
                   <div
                     key={player.id}
                     className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-500
-                      ${idx === 0 ? 'bg-yellow-500/20 border-yellow-500 md:col-span-2' :
-                        idx === 1 ? 'bg-slate-400/20 border-slate-400' :
-                          idx === 2 ? 'bg-orange-600/20 border-orange-500' :
-                            'bg-slate-800/50 border-slate-600'}
+                      ${idx < 4
+                        ? idx === 0 ? 'bg-yellow-500/20 border-yellow-500 md:col-span-2' :
+                          idx === 1 ? 'bg-slate-400/20 border-slate-400' :
+                            idx === 2 ? 'bg-orange-600/20 border-orange-500' :
+                              'bg-green-600/20 border-green-500'
+                        : 'bg-red-900/20 border-red-500/50 opacity-60'}
                     `}
                     style={{
                       animation: `slideIn 0.5s ease-out ${idx * 0.1}s both`
                     }}
                   >
                     <div className="flex items-center space-x-4">
-                      <span className={`text-3xl font-bold ${idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-orange-400' : 'text-slate-400'}`}>
+                      <span className={`text-3xl font-bold ${idx < 4
+                          ? idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-orange-400' : 'text-green-400'
+                          : 'text-red-400'
+                        }`}>
                         {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
                       </span>
-                      <span className="font-semibold text-xl">{player.name}</span>
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-xl">{player.name}</span>
+                        {idx < 4
+                          ? <span className="text-xs text-green-400">Vào Vòng Tăng Tốc</span>
+                          : <span className="text-xs text-red-400">Bị loại</span>
+                        }
+                      </div>
                     </div>
-                    <span className="text-2xl font-bold text-[#22C55E]">{player.warmupScore || 0} điểm</span>
+                    <span className="text-2xl font-bold text-[#22C55E]">{player.score || 0} điểm</span>
                   </div>
                 ))}
               </div>
@@ -402,6 +414,83 @@ export default function HostPage() {
             </div>
           )}
 
+          {/* Game Finished - Final Leaderboard */}
+          {gameState?.phase === 'finished' && (
+            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-8 border-2 border-[#FFD700]">
+              <div className="text-center mb-8">
+                <div className="relative inline-block">
+                  <p className="text-7xl animate-bounce">🏆</p>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-24 h-24 bg-yellow-400/20 rounded-full animate-ping"></div>
+                  </div>
+                </div>
+                <h2 className="text-4xl font-bold text-[#FFD700] mt-4">KẾT THÚC CUỘC THI</h2>
+                <p className="text-slate-400 mt-2">Bảng Xếp Hạng Chung Cuộc - TOP 4</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                {[...gameState.players]
+                  .filter(p => !p.eliminated)
+                  .sort((a, b) => b.score - a.score)
+                  .map((player, idx) => {
+                    const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '';
+
+                    return (
+                      <div
+                        key={player.id}
+                        className={`p-4 rounded-xl border-2 transition-all duration-500
+                          ${idx === 0
+                            ? 'bg-yellow-500/20 border-yellow-500 md:col-span-2'
+                            : idx === 1
+                              ? 'bg-slate-400/20 border-slate-400'
+                              : idx === 2
+                                ? 'bg-orange-600/20 border-orange-500'
+                                : 'bg-green-600/20 border-green-500'}
+                        `}
+                        style={{
+                          animation: `slideIn 0.5s ease-out ${idx * 0.1}s both`
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <span className={`text-3xl font-bold ${idx === 0 ? 'text-yellow-400' :
+                                idx === 1 ? 'text-slate-300' :
+                                  idx === 2 ? 'text-orange-400' : 'text-green-400'
+                              }`}>
+                              {medal || `#${idx + 1}`}
+                            </span>
+                            <div className="flex flex-col">
+                              <span className={`font-semibold ${idx === 0 ? 'text-2xl' : 'text-xl'}`}>
+                                {player.name}
+                              </span>
+                              {idx === 0 && (
+                                <span className="text-xs text-yellow-400 font-medium">🎉 Quán quân!</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className={`font-bold ${idx === 0 ? 'text-4xl text-yellow-400' : 'text-2xl text-[#7C3AED]'}`}>
+                              {player.score}
+                            </span>
+                            <span className="text-slate-400 text-sm ml-1">điểm</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+
+              <div className="text-center mt-8">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-8 py-3 bg-gradient-to-r from-[#7C3AED] to-[#F43F5E] hover:from-purple-600 hover:to-rose-600 rounded-xl font-semibold transition-colors cursor-pointer"
+                >
+                  Chơi Lại
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Result Notification */}
           {showResult && (
             <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 
@@ -490,10 +579,11 @@ export default function HostPage() {
           {/* Players & Scoreboard */}
           <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
             <h2 className="text-lg font-semibold text-slate-300 mb-4">
-              Thí sinh ({gameState?.players.length || 0})
+              Thí sinh ({gameState?.players.filter(p => !p.eliminated).length || 0})
             </h2>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {gameState?.players
+                .filter(p => !p.eliminated)
                 .sort((a, b) => b.score - a.score)
                 .map((player, idx) => (
                   <div
